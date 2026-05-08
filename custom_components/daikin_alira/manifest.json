@@ -6,7 +6,13 @@
   "iot_class": "local_polling",
   "requirements": [],
   "dependencies": [],
-  "codeowners": ["@cambot1901"],
-  "platforms": ["sensor", "climate"],
-  "documentation": "https://github.com/cambot1901/ha-daikin-alira"
+  "codeowners": [
+    "@cambot1901",
+    "@leonseng"
+  ],
+  "platforms": [
+    "sensor",
+    "climate"
+  ],
+  "documentation": "https://github.com/leonseng/ha-daikin-alira"
 }
