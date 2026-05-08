@@ -14,17 +14,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """
     Set up Daikin Alira from a config entry.
 
-    Forward the entry separately to each platform (sensor & climate)
-    because async_setup_platforms() is not supported on this HA version.
+    Forward the entry to all platforms (sensor & climate).
     """
-    # Forward to sensor platform
-    hass.async_create_task(
-        hass.config_entries.async_forward_entry_setup(entry, PLATFORMS[0])
-    )
-    # Forward to climate platform
-    hass.async_create_task(
-        hass.config_entries.async_forward_entry_setup(entry, PLATFORMS[1])
-    )
+    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     return True
 
 
@@ -32,10 +24,6 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """
     Unload a config entry.
 
-    Unload each platform (sensor & climate) individually.
+    Unload all platforms (sensor & climate).
     """
-    # Unload sensor
-    await hass.config_entries.async_forward_entry_unload(entry, PLATFORMS[0])
-    # Unload climate
-    await hass.config_entries.async_forward_entry_unload(entry, PLATFORMS[1])
-    return True
+    return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)

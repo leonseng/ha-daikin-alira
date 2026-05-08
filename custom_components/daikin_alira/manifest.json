@@ -1,7 +1,7 @@
 {
   "domain": "daikin_alira",
   "name": "Daikin Alira",
-  "version": "0.1.1",
+  "version": "1.0.2",
   "config_flow": true,
   "iot_class": "local_polling",
   "requirements": [],
