@@ -1,6 +1,6 @@
 # Daikin Alira Home Assistant Integration
 
-**Repository:** https://github.com/cambot1901/ha-daikin-alira
+**Repository:** https://github.com/leonseng/ha-daikin-alira
 
 A custom Home Assistant integration to control and monitor Daikin Alira air conditioners over HTTP.
 
@@ -112,10 +112,9 @@ Clone this repository into your local `custom_components` folder. Key entry poin
 
 ## Credits
 
-Author: [@cambot1901](https://github.com/cambot1901)
+Author: [@leonseng](https://github.com/leonseng)
+
+Forked from [@cambot1901](https://github.com/cambot1901/ha-daikin-alira).
 
 This integration follows Home Assistant's `ClimateEntity` and `CoordinatorEntity` patterns. Feel free to open issues or submit pull requests on GitHub.
 
----
-
-*Last updated: May 31, 2025*
