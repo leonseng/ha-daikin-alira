@@ -51,6 +51,8 @@ SUPPORTED_HVAC_MODES = [
 _ATTR_SUPPORTED_FEATURES = (
     ClimateEntityFeature.TARGET_TEMPERATURE
     | ClimateEntityFeature.FAN_MODE
+    | ClimateEntityFeature.TURN_ON 
+    | ClimateEntityFeature.TURN_OFF
 )
 
 # Temperature range (°C)
@@ -244,40 +246,7 @@ class DaikinClimate(CoordinatorEntity, ClimateEntity):
         """
         # Turn OFF
         if hvac_mode == HVAC_MODE_OFF:
-            payload_off = {
-                "requests": [
-                    {
-                        "op": 3,
-                        "to": "/dsiot/edge/adr_0100.dgc_status",
-                        "pc": {
-                            "pn": "dgc_status",
-                            "pch": [
-                                {
-                                    "pn": "e_1002",
-                                    "pch": [
-                                        {
-                                            "pn": "e_A002",
-                                            "pch": [{"pn": "p_01", "pv": "00"}],
-                                        }
-                                    ],
-                                }
-                            ],
-                        },
-                    }
-                ]
-            }
-            url = f"http://{self.host}/dsiot/multireq"
-            session = async_get_clientsession(self.hass)
-            try:
-                async with session.put(
-                    url, json=payload_off, headers={"Content-Type": "application/json"}
-                ) as resp:
-                    resp.raise_for_status()
-                    _LOGGER.info("Climate: set HVAC_MODE OFF (power=00)")
-            except Exception as e:
-                _LOGGER.error("Climate: error setting OFF: %s", e)
-
-            await self.coordinator.async_request_refresh()
+            await self.async_turn_off()  # delegate — no duplication
             return
 
         # If not OFF, map and set mode + ensure power=01
@@ -328,6 +297,78 @@ class DaikinClimate(CoordinatorEntity, ClimateEntity):
         except Exception as e:
             _LOGGER.error("Climate: error setting hvac_mode %s: %s", hvac_mode, e)
 
+        await self.coordinator.async_request_refresh()
+
+    async def async_turn_on(self) -> None:
+        """Turn the AC on (restore last active mode)."""
+        payload = {
+            "requests": [
+                {
+                    "op": 3,
+                    "to": "/dsiot/edge/adr_0100.dgc_status",
+                    "pc": {
+                        "pn": "dgc_status",
+                        "pch": [
+                            {
+                                "pn": "e_1002",
+                                "pch": [
+                                    {
+                                        "pn": "e_A002",
+                                        "pch": [{"pn": "p_01", "pv": "01"}],
+                                    }
+                                ],
+                            }
+                        ],
+                    },
+                }
+            ]
+        }
+        url = f"http://{self.host}/dsiot/multireq"
+        session = async_get_clientsession(self.hass)
+        try:
+            async with session.put(
+                url, json=payload, headers={"Content-Type": "application/json"}
+            ) as resp:
+                resp.raise_for_status()
+                _LOGGER.info("Climate: turned ON (power=01)")
+        except Exception as e:
+            _LOGGER.error("Climate: error turning on: %s", e)
+        await self.coordinator.async_request_refresh()
+
+    async def async_turn_off(self) -> None:
+        """Turn the AC off."""
+        payload = {
+            "requests": [
+                {
+                    "op": 3,
+                    "to": "/dsiot/edge/adr_0100.dgc_status",
+                    "pc": {
+                        "pn": "dgc_status",
+                        "pch": [
+                            {
+                                "pn": "e_1002",
+                                "pch": [
+                                    {
+                                        "pn": "e_A002",
+                                        "pch": [{"pn": "p_01", "pv": "00"}],
+                                    }
+                                ],
+                            }
+                        ],
+                    },
+                }
+            ]
+        }
+        url = f"http://{self.host}/dsiot/multireq"
+        session = async_get_clientsession(self.hass)
+        try:
+            async with session.put(
+                url, json=payload, headers={"Content-Type": "application/json"}
+            ) as resp:
+                resp.raise_for_status()
+                _LOGGER.info("Climate: turned OFF (power=00)")
+        except Exception as e:
+            _LOGGER.error("Climate: error turning off: %s", e)
         await self.coordinator.async_request_refresh()
 
     async def async_set_temperature(self, **kwargs) -> None:
